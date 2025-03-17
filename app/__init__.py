@@ -21,6 +21,9 @@ def create_app(config_class=None):
     db.init_app(app)
     api.init_app(app)
 
-    migrate = Migrate()
+    from app.register_routes import register_routes
+    register_routes()
+
+    migrate = Migrate(app, db)
 
     return app

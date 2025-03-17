@@ -1,7 +1,9 @@
 import os
 
+SECRET_KEY = os.environ.get('SECRET_KEY', 'a_very_secret_key')
+
+
 class Config(object):
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'a_very_secret_key')
     SQLALCHEMY_DATABASE_URI = 'sqlite:///edutrack.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
