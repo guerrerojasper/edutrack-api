@@ -1,9 +1,11 @@
 from flask_restx import Namespace, Resource
 from app.models.user import User
-from app.schemas.user_schema import user_model, user_response_model
+from app.schemas import user_model, response_model
 from app import api, db
 
-from app.utils import require_api_key, hashed_password
+from .model import get_all_users, get_user
+
+from app.utils import require_api_key, hashed_password, create_response
 
 user_ns = Namespace(
     'users',
@@ -13,19 +15,24 @@ user_ns = Namespace(
 @user_ns.route('/')
 class UserHandler(Resource):
     @user_ns.doc('list_users')
-    @user_ns.marshal_with(user_response_model)
+    @user_ns.marshal_with(response_model)
     @require_api_key
     def get(self):
-        users = User.query.all()
+        users = get_all_users()
 
-        return users, 200
+        return create_response('success', '', [user.to_dict() for user in users], 200)
     
     @user_ns.doc('create_user')
-    @user_ns.expect(user_model)
-    @user_ns.marshal_with(user_response_model)
+    @user_ns.expect(user_model, validate=True)
+    @user_ns.marshal_with(response_model)
     @require_api_key
     def post(self):
         data = api.payload
+        
+        exiting_user = get_user(email=data['email'])
+        if exiting_user:
+            return create_response('error', 'User already exist!', '', 201)
+
         user = User(
             first_name=data['first_name'],
             last_name=data['last_name'],
@@ -37,4 +44,4 @@ class UserHandler(Resource):
         db.session.add(user)
         db.session.commit()
 
-        return user, 201
+        return create_response('success', '', user.to_dict(), 201)
