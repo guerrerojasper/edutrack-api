@@ -1,4 +1,5 @@
 from flask_restx import Namespace, Resource
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.user import User
 from app.schemas import user_model, response_model
 from app import api, db
@@ -16,15 +17,17 @@ user_ns = Namespace(
 class UserHandler(Resource):
     @user_ns.doc('list_users')
     @user_ns.marshal_with(response_model)
+    @jwt_required()
     @require_api_key
     def get(self):
         users = get_all_users()
 
-        return create_response('success', '', [user.to_dict() for user in users], 200)
+        return create_response('success', f'Requestor: {get_jwt_identity()}', [user.to_dict() for user in users], 200)
     
     @user_ns.doc('create_user')
     @user_ns.expect(user_model, validate=True)
     @user_ns.marshal_with(response_model)
+    @jwt_required()
     @require_api_key
     def post(self):
         data = api.payload

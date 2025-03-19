@@ -7,6 +7,8 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///edutrack.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    JWT_SECRET_KEY = SECRET_KEY
+
 class TestConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # Use an in-memory database for testing
