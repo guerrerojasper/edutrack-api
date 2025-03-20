@@ -14,4 +14,10 @@ class User(db.Model):
         return f'USER - Name: {self.first_name}, Email: {self.email}, Job Title {self.job_title}'
     
     def to_dict(self):
-        return {'user_id': self.user_id, 'first_name': self.first_name, 'last_name': self.last_name, 'email': self.email, 'job_title': self.job_title}
+        return {
+            'user_id': self.user_id, 
+            'first_name': self.first_name, 
+            'last_name': self.last_name, 
+            'email': self.email, 
+            'job_title': self.job_title
+        }

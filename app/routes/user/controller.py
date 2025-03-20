@@ -27,7 +27,7 @@ class UserHandler(Resource):
     @user_ns.doc('create_user')
     @user_ns.expect(user_model, validate=True)
     @user_ns.marshal_with(response_model)
-    @jwt_required()
+    # @jwt_required()
     @require_api_key
     def post(self):
         data = api.payload

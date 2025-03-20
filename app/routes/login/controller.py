@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 
 from datetime import timedelta
 
@@ -36,5 +36,18 @@ class LoginHandler(Resource):
         
         # create access token
         access_token = create_access_token(identity=user_email, expires_delta=timedelta(minutes=15))
+        refresh_token = create_refresh_token(identity=user_email, expires_delta=timedelta(days=7))
 
-        return create_response('success', '', {'token': access_token}, 200)
+        return create_response('success', '', {'access_token': access_token, 'refresh_token': refresh_token}, 200)
+
+@login_ns.route('/refresh')
+class LoginResourceHandler(Resource):
+    @login_ns.doc('refresh_token')
+    @login_ns.marshal_with(response_model)
+    @jwt_required(refresh=True)
+    @require_api_key
+    def post(self):
+        current_user_email = get_jwt_identity()
+        new_access_token = create_access_token(identity=current_user_email, expires_delta=timedelta(minutes=15))
+
+        return create_response('success', '', {'access_token': new_access_token}, 200)
