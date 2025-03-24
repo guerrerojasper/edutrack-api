@@ -55,7 +55,9 @@ class SubjectResourceHandler(Resource):
     @jwt_required()
     @require_api_key
     def get(self, id):
-        subject = get_subject(id)
+        subject = get_subject(id)  
+        if not subject:
+            return create_response('success', 'Subject not found!', [{'subject_id': id}], 404)
 
         return create_response('success', '', [subject.to_dict()], 200)
     
@@ -71,7 +73,7 @@ class SubjectResourceHandler(Resource):
         if not subject:
             return create_response('success', 'Subject not found!', [{'subject_id': id}], 404)
 
-        return create_response('success', '', [subject.to_dict()], 201)
+        return create_response('success', f'Subject with ID number: {id} is updated!', [subject.to_dict()], 201)
     
     @subject_ns.doc('delete_subject')
     @subject_ns.marshal_with(response_model)
@@ -83,7 +85,7 @@ class SubjectResourceHandler(Resource):
         if not is_deleted:
             return create_response('success', 'Subject not found!', [{'subject_id': id}], 404)
 
-        return create_response('success', f'Subject with ID: {id} is deleted!', '', 204)
+        return create_response('success', f'Subject with ID number: {id} is deleted!', '', 204)
 
 @subject_ns.route('/student/<int:id>')
 @subject_ns.param('id', 'Student ID identifier.')

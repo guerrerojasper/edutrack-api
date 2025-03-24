@@ -55,6 +55,8 @@ class StudentResourceHandler(Resource):
     @require_api_key
     def get(self, id):
         student = get_student(id)
+        if not student:
+            return create_response('error', 'Student not found!', [{'student_id': id}], 404)
 
         return create_response('success', '', [student.to_dict()], 200)
     
@@ -66,11 +68,10 @@ class StudentResourceHandler(Resource):
     def patch(self, id):
         data = api.payload
         student = update_student(id, data)
-
         if not student:
             return create_response('error', 'Student not found!', [{'student_id': id}], 404)
         
-        return create_response('success', '', [student.to_dict()], 201)
+        return create_response('success', f'Student with ID number: {id} is updated!', [student.to_dict()], 201)
     
     @student_ns.doc('delete_student')
     @student_ns.marshal_with(response_model)

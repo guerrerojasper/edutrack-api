@@ -3,8 +3,9 @@ from app.models import Student
 def test_post_student(client, auth_headers):
     """
         Test POST /student endpoint.
-        Test DB query.
         Test PATCH /student endpoint.
+        Test DELETE /student endpoint.
+        Test DB query.
     """
     # Add new student
     new_student = {
@@ -48,6 +49,7 @@ def test_post_student(client, auth_headers):
     # Delete student
     response = client.delete(f'/student/{student_id}', headers=auth_headers)
     assert response.status_code == 204
+
     student = Student.query.filter(Student.name == 'Testing').first()
     assert student is None
     
