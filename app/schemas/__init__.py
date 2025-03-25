@@ -4,3 +4,4 @@ from .login_schema import login_schema
 from .student_schema import student_model
 from .subject_schema import subject_model
 from .event_schema import event_model
+from .event_log_schema import event_log_model

@@ -78,4 +78,4 @@ class EventResourceHandler(Resource):
         if not is_deleted:
             return create_response('error', 'Event not found!', [{'event_id': id}], 404)
 
-        return create_response('success', f'Event with ID number: {id} is deleted!', '', 204)
+        return create_response('success', f'Event with ID number: {id} is deleted!', [], 204)
