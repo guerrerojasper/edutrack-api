@@ -3,10 +3,12 @@ from flask_jwt_extended import create_access_token, create_refresh_token, jwt_re
 
 from datetime import timedelta
 
+
+from app import api, logger
 from app.schemas import login_schema, response_model
-from .model import get_user
-from app import api
 from app.utils import require_api_key, create_response, descrypt_password
+
+from .model import get_user
 
 login_ns = Namespace(
     'login',
@@ -20,7 +22,9 @@ class LoginHandler(Resource):
     @login_ns.marshal_with(response_model)
     @require_api_key
     def post(self):
+        logger.info('Authenticate user')
         data = api.payload
+        logger.debug(f'Authenticate user body param: {data}')
         email = data['email']
         password = data['password']
 
@@ -47,6 +51,7 @@ class LoginResourceHandler(Resource):
     @jwt_required(refresh=True)
     @require_api_key
     def post(self):
+        logger.info('Refresh auth token')
         current_user_email = get_jwt_identity()
         new_access_token = create_access_token(identity=current_user_email, expires_delta=timedelta(minutes=15))
 

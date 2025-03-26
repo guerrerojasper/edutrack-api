@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource
 from flask_jwt_extended import jwt_required
 
-from app import api, db
+from app import api, logger
 from app.schemas import response_model, student_model
 from app.utils import require_api_key, create_response
 
@@ -19,6 +19,7 @@ class StudentHandler(Resource):
     @jwt_required()
     @require_api_key
     def get(self):
+        logger.info('Get all students')
         students = get_students()
 
         return create_response('success', '', [student.to_dict() for student in students], 200)
@@ -30,18 +31,23 @@ class StudentHandler(Resource):
     @jwt_required()
     @require_api_key
     def post(self):
+        logger.info('Create student')
         data = api.payload
+        logger.info(f'Student body param: {data}')
 
-        student = create_student(
-            name=data['name'],
-            school=data['school'],
-            grade=data['grade'],
-            section=data['section'],
-            adviser=data['adviser'],
-            rank=data['rank'],
-            school_year=data['school_year'],
-            total_year=data['total_year']
-        )
+        try:
+            student = create_student(
+                name=data['name'],
+                school=data['school'],
+                grade=data['grade'],
+                section=data['section'],
+                adviser=data['adviser'],
+                rank=data['rank'],
+                school_year=data['school_year'],
+                total_year=data['total_year']
+            )
+        except Exception as e:
+            logger.error(f'Create student error: {e}')
 
         return create_response('success', '', [student.to_dict()], 201)
 
@@ -54,6 +60,8 @@ class StudentResourceHandler(Resource):
     @jwt_required()
     @require_api_key
     def get(self, id):
+        logger.info('Get student')
+        logger.info(f'Student path param: {id}')
         student = get_student(id)
         if not student:
             return create_response('error', 'Student not found!', [{'student_id': id}], 404)
@@ -66,7 +74,9 @@ class StudentResourceHandler(Resource):
     @jwt_required()
     @require_api_key
     def patch(self, id):
+        logger.info('Update student')
         data = api.payload
+        logger.info(f'Student body param: {data}')
         student = update_student(id, data)
         if not student:
             return create_response('error', 'Student not found!', [{'student_id': id}], 404)
@@ -78,6 +88,8 @@ class StudentResourceHandler(Resource):
     @jwt_required()
     @require_api_key
     def delete(self, id):
+        logger.info('Delete student')
+        logger.info(f'Student path param: {id}')
         is_deleted = delete_student(id)
 
         if not is_deleted:

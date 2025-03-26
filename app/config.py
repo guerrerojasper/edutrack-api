@@ -1,6 +1,8 @@
 import os
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'a_very_secret_key')
+LOGGER_NAME = os.environ.get('LOGGER_NAME', 'EDUTRACK_API')
+DEBUG_MODE = os.environ.get('DEBUG_MODE', True)
 
 
 class Config(object):

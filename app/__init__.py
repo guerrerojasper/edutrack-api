@@ -1,10 +1,19 @@
-from flask import Flask
+import time
+import uuid
+
+from flask import Flask, request, g
 from flask_restx import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 
 from app.utils import create_response
+from app.logger import LogHandler
+
+from app.config import LOGGER_NAME, DEBUG_MODE
+
+logger = LogHandler(LOGGER_NAME, DEBUG_MODE)
+logger.log_setup()
 
 db = SQLAlchemy()
 api = Api(
@@ -25,6 +34,30 @@ def create_app(config_class=None):
     api.init_app(app)
     jwt = JWTManager(app)
 
+    # logger callback
+    @app.before_request
+    def log_request_info():
+        g.start_time = time.time() # timer
+        g.request_id = str(uuid.uuid4()) # unique request id
+
+        logger.info(
+            f'Request ID: {g.request_id}, Method: {request.method}, URL: {request.url}'
+        )
+    
+    @app.after_request
+    def log_response_info(response):
+        duration = time.time() - g.start_time
+        logger.info(
+            f'Request ID: {g.request_id}, Status: {response.status_code}, Duration: {duration:.2f}s'
+        )
+
+        return response
+    
+    @app.teardown_request
+    def log_teardown(exception=None):
+        if exception:
+            logger.error(f'Teardown error: {str(exception)}')
+
     # jwt custom callback
     @jwt.unauthorized_loader
     def unauthorized_callback(error):
@@ -38,5 +71,7 @@ def create_app(config_class=None):
     register_routes()
 
     migrate = Migrate(app, db)
+
+    logger.info('App Started')
 
     return app

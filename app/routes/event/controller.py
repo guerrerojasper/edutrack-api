@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource
 from flask_jwt_extended import jwt_required
 
-from app import api
+from app import api, logger
 from app.schemas import event_model, response_model
 from app.utils import create_response, require_api_key
 
@@ -19,6 +19,7 @@ class EventHandler(Resource):
     @jwt_required()
     @require_api_key
     def get(self):
+        logger.info('Get all events')
         events = get_events()
 
         return create_response('success', '', [event.to_dict() for event in events], 200)
@@ -30,13 +31,20 @@ class EventHandler(Resource):
     @require_api_key
     def post(self):
         data = api.payload
-        event = create_event(
-            event_title=data['event_title'],
-            date=data['date'], # YYYY-MM-DD
-            time=data['time'], # HH:MM
-            desc=data['desc'],
-            location=data['location']
-        )
+
+        logger.info('Create event')
+        logger.info(f'Event body param: {data}')
+
+        try:
+            event = create_event(
+                event_title=data['event_title'],
+                date=data['date'], # YYYY-MM-DD
+                time=data['time'], # HH:MM
+                desc=data['desc'],
+                location=data['location']
+            )
+        except Exception as e:
+            logger.error(f'Create event error: {e}')
 
         return create_response('success', '', [event.to_dict()], 201)
 
@@ -48,6 +56,8 @@ class EventResourceHandler(Resource):
     @jwt_required()
     @require_api_key
     def get(self, id):
+        logger.info('Get event')
+        logger.info(f'Event path param ID: {id}')
         event = get_event(id)
         if not event:
            return create_response('error', 'Event not found!', [{'event_id': id}], 404)
@@ -60,7 +70,9 @@ class EventResourceHandler(Resource):
     @jwt_required()
     @require_api_key
     def patch(self, id):
+        logger.info('Update event')
         data = api.payload
+        logger.info(f'Event body param: {data}')
         event = update_event(id, data)
 
         if not event:
@@ -73,6 +85,8 @@ class EventResourceHandler(Resource):
     @jwt_required()
     @require_api_key
     def delete(self, id):
+        logger.info('Delete event')
+        logger.info(f'Event path param ID: {id}')
         is_deleted = delete_event(id)
 
         if not is_deleted:
